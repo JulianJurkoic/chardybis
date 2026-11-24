@@ -3,8 +3,9 @@
  *
  * SPDX-License-Identifier: MIT
  */
- 
+
 #include "charybdis.dtsi"
+#include <zephyr/dt-bindings/input/input-event-codes.h>
 
 &default_transform {
     col-offset = <6>;
@@ -21,16 +22,52 @@
 		;
 };
 
-// trackball bus
-&spi0 {
-	status = "okay"; //okay
-	sck-pin = <8>; //old
-    mosi-pin = <17>; //old
-    miso-pin = <17>;//old same as mosi (3-wire spi)
-	cs-gpios = <&gpio0 20 GPIO_ACTIVE_LOW>;
+&pinctrl {
+	charybdis_spi_default: charybdis_spi_default {
+		group1 {
+			/* 3-wire SPI: MISO is tied to MOSI */
+			psels = <NRF_PSEL(SPIM_SCK, 0, 8)>,
+				<NRF_PSEL(SPIM_MOSI, 0, 17)>,
+				<NRF_PSEL(SPIM_MISO, 0, 17)>;
+		};
+	};
+
+	charybdis_spi_sleep: charybdis_spi_sleep {
+		group1 {
+			psels = <NRF_PSEL(SPIM_SCK, 0, 8)>,
+				<NRF_PSEL(SPIM_MOSI, 0, 17)>,
+				<NRF_PSEL(SPIM_MISO, 0, 17)>;
+			low-power-enable;
+		};
+	};
 };
 
-&trackball {
-	status = "okay"; //okay
-	irq-gpios = <&gpio0 6 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>;
+&pro_micro_spi {
+	status = "okay";
+	compatible = "nordic,nrf-spim";
+	pinctrl-0 = <&charybdis_spi_default>;
+	pinctrl-1 = <&charybdis_spi_sleep>;
+	pinctrl-names = "default", "sleep";
+	cs-gpios = <&gpio0 20 GPIO_ACTIVE_LOW>;
+
+	trackball: trackball@0 {
+		status = "okay";
+		compatible = "pixart,pmw3610-alt";
+		reg = <0>;
+		spi-max-frequency = <2000000>;
+		irq-gpios = <&gpio0 6 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>;
+		cpi = <400>;
+		evt-type = <INPUT_EV_REL>;
+		x-input-code = <INPUT_REL_X>;
+		y-input-code = <INPUT_REL_Y>;
+		/* Sensor is mounted rotated 90 deg; matches ORIENTATION_90 + INVERT_X of the old driver */
+		swap-xy;
+		invert-x;
+		invert-y;
+	};
+};
+
+&charybdis_listener {
+	status = "okay";
+	device = <&trackball>;
 };
