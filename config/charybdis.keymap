@@ -1,3 +1,7 @@
+// Must precede <dt-bindings/zmk/pointing.h>, which only defines these if unset.
+#define ZMK_POINTING_DEFAULT_MOVE_VAL 1000 // 600
+#define ZMK_POINTING_DEFAULT_SCRL_VAL 12   // 10
+
 #include <behaviors.dtsi>
 #include <dt-bindings/zmk/bt.h>
 #include <dt-bindings/zmk/keys.h>
@@ -7,9 +11,6 @@
 #include <dt-bindings/zmk/mouse.h>
 #include <input/processors.dtsi>
 #include <zephyr/dt-bindings/input/input-event-codes.h>
-
-#define ZMK_POINTING_DEFAULT_MOVE_VAL 1000 // 600
-#define ZMK_POINTING_DEFAULT_SCRL_VAL 12   // 10
 
 
 &lt {
@@ -32,6 +33,10 @@
 &mmv_input_listener { input-processors = <&zip_xy_scaler 2 1>; };
 
 &msc_input_listener { input-processors = <&zip_scroll_scaler 2 1>; };
+
+// Physical trackball (on the right/central half): apply the same 2x pointer
+// scaling as the emulated &mmv listener.
+&charybdis_listener { input-processors = <&zip_xy_scaler 2 1>; };
 
 &msc {
     acceleration-exponent = <0>;      // 0
