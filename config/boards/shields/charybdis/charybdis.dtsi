@@ -36,25 +36,13 @@
             ;
     };
 
-	trackballs {
-		compatible = "zmk,keymap-trackballs";
-		trackballs = <&trackball>;
-	};
+    /*
+     * Shared input listener for the trackball. It is disabled here so that both
+     * halves share the node (the keymap is built for both); the right (central)
+     * half enables it and points it at the PMW3610 sensor.
+     */
+    charybdis_listener: charybdis_listener {
+        compatible = "zmk,input-listener";
+        status = "disabled";
+    };
 };
-
-&spi0 {
-	compatible = "nordic,nrf-spim";
-	status = "disabled";
-
-	trackball: trackball@0 {
-		compatible = "pixart,pmw3610";
-		status = "disabled";
-		reg = <0>;
-		label = "TRACKBALL";
-		spi-max-frequency = <2000000>;
-		duplex = <2048>; // required by 3-wire spi
-	};
-};
-
-
-
