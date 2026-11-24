@@ -34,9 +34,19 @@
 
 &msc_input_listener { input-processors = <&zip_scroll_scaler 2 1>; };
 
-// Physical trackball (on the right/central half): apply the same 2x pointer
-// scaling as the emulated &mmv listener.
-&charybdis_listener { input-processors = <&zip_xy_scaler 2 1>; };
+// Physical trackball (on the right/central half).
+&charybdis_listener {
+    // Same 2x pointer scaling as the emulated &mmv listener.
+    input-processors = <&zip_xy_scaler 2 1>;
+
+    // Layer 1 makes the trackball a scroll wheel, replacing the old
+    // trackball-bindings = <&tsl>. Divisor 10 matches tsl scale_factor 10;
+    // the mapper sends Y to the wheel and X to the horizontal wheel.
+    scroller {
+        layers = <1>;
+        input-processors = <&zip_xy_scaler 1 10>, <&zip_xy_to_scroll_mapper>;
+    };
+};
 
 &msc {
     acceleration-exponent = <0>;      // 0
